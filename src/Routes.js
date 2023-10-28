@@ -3,21 +3,23 @@ import React, { useEffect } from "react";
 import Home from "./containers/Home";
 import Form from "./containers/Form";
 import { Route, Routes, Outlet } from "react-router-dom";
+import useStore from "./store/zustandStore";
 
 export default function MyRoutes(props) {
   const { tableRows, pokemonTypesOptions, handleUpdatePokemonRow } = props;
 
+  const { pokemonData } = useStore();
   return (
     <div>
       <Routes>
         <Route path="/">
           <Route index path="/" element={<Home tableRows={tableRows} />} />
-          <Route
+          {/* <Route
             path="home"
             element={<Form pokemonTypesOptions={pokemonTypesOptions} />}
-          />
+          /> */}
           <Route
-            path="" // ? wich path?
+            path="/form/:name" // ? wich path?
             element={
               <Form
                 pokemonTypesOptions={pokemonTypesOptions}

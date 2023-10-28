@@ -2,78 +2,70 @@ import * as React from "react";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import ImageListItemBar from "@mui/material/ImageListItemBar";
+import { useState } from "react";
 
-export default function StandardImageList(props) {
-  const [selected, setSelected] = React.useState(defaultValue);
-  setSelected((st) => st + 1);
+export default function StandardImageList({ pokemonToUpdate, info, setInfo }) {
+  // const [selected, setSelected] = React.useState({});
+  // setSelected((st) => st + 1);
+
+  const sprites = pokemonToUpdate?.sprites;
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const images = {
+    back_default: sprites?.back_default,
+    back_female: sprites?.back_female,
+    back_shiny: sprites?.back_shiny,
+    back_shiny_female: sprites?.back_shiny_female,
+    front_default: sprites?.front_default,
+    front_female: sprites?.front_female,
+    front_shiny: sprites?.front_shiny,
+    front_shiny_female: sprites?.front_shiny_female,
+    dream_world_front_default: sprites?.other.dream_world.front_default,
+    dream_world_front_female: sprites?.other.dream_world.front_female,
+    home_front_default: sprites?.other.home.front_default,
+    home_front_female: sprites?.other.home.front_female,
+    home_front_shiny: sprites?.other.home.front_shiny,
+    home_front_shiny_female: sprites?.other.home.front_shiny_female,
+    artwork_front_default: sprites?.other["official-artwork"].front_default,
+    artwork_front_shiny: sprites?.other["official-artwork"].front_shiny,
+  };
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
       <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
-        {list &&
-          list.map((item) => (
-            <ImageListItem key={item.img}>
-              <img
-                src={`${item.img}?w=164&h=164&fit=crop&auto=format`}
-                srcSet={`${item.img}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                alt={item.title}
-                loading="lazy"
-                // onClick={handleChange(item.img)}
-              />
-              <ImageListItemBar title={item.title} subtitle={item.author} />
+        {Object.entries(images).map(([key, value]) => {
+          if (value === null) {
+            return <></>;
+          }
+          const imgSrc = `${value}?w=164&h=164&fit=crop&auto=format`;
+
+          const handleClick = () => {
+            setSelectedImage(key);
+            setInfo({
+              ...info,
+              img: `${value}?w=164&h=164&fit=crop&auto=format`,
+            });
+          };
+
+          return (
+            <ImageListItem key={key}>
+              {value && (
+                <img
+                  src={imgSrc}
+                  alt={key}
+                  loading="lazy"
+                  onClick={handleClick}
+                  style={{
+                    border: selectedImage === key ? "3px solid red" : "none",
+                    width: "160px",
+                    height: "160px",
+                  }}
+                />
+              )}
+              <ImageListItemBar title={key} />
             </ImageListItem>
-          ))}
+          );
+        })}
       </ImageList>
     </div>
   );
 }
-
-const list = [
-  {
-    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
-    title: "Breakfast",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
-    title: "Burger",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
-    title: "Camera",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
-    title: "Coffee",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
-    title: "Hats",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
-    title: "Honey",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
-    title: "Basketball",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
-    title: "Fern",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
-    title: "Mushrooms",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-    title: "Tomato basil",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
-    title: "Sea star",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
-    title: "Bike",
-  },
-];

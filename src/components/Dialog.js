@@ -8,7 +8,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import Typography from "@mui/material/Typography";
+import useStore from "../store/zustandStore";
+import { Box } from "@mui/material";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -48,9 +49,10 @@ BootstrapDialogTitle.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-export default function CustomizedDialogs() {
-  const [open, setOpen] = React.useState(false);
+export default function CustomizedDialogs({ open, setOpen, name }) {
+  const { pokemonData } = useStore();
 
+  const selectedPokemon = pokemonData.find((poke) => poke.name === name);
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -72,31 +74,101 @@ export default function CustomizedDialogs() {
           id="customized-dialog-title"
           onClose={handleClose}
         >
-          Modal title
+          Sprites
         </BootstrapDialogTitle>
         <DialogContent dividers>
-          <Typography gutterBottom>
-            Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-            dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
-            ac consectetur ac, vestibulum at eros.
-          </Typography>
-          <Typography gutterBottom>
-            Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
-            Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor
-            auctor.
-          </Typography>
-          <Typography gutterBottom>
-            Aenean lacinia bibendum nulla sed consectetur. Praesent commodo
-            cursus magna, vel scelerisque nisl consectetur et. Donec sed odio
-            dui. Donec ullamcorper nulla non metus auctor fringilla.
-          </Typography>
+          <SpritesImages selectedpokemon={selectedPokemon} />
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={handleClose}>
-            Save changes
+            Close
           </Button>
         </DialogActions>
       </BootstrapDialog>
     </div>
   );
 }
+
+export const SpritesImages = ({ selectedpokemon }) => {
+  const spriteImages = [
+    {
+      key: "front_default",
+      label: "Vista frontal (predeterminado)",
+    },
+    {
+      key: "front_shiny",
+      label: "Vista frontal (brillante)",
+    },
+    {
+      key: "back_default",
+      label: "Vista trasera (predeterminado)",
+    },
+    {
+      key: "back_shiny",
+      label: "Vista trasera (brillante)",
+    },
+    {
+      key: "other.home.front_default",
+      label: "Vista frontal en casa (predeterminado)",
+    },
+    {
+      key: "other.home.front_shiny",
+      label: "Vista frontal en casa (brillante)",
+    },
+    {
+      key: 'other["official-artwork"].front_default',
+      label: "Vista frontal de arte oficial (predeterminado)",
+    },
+    {
+      key: 'other["official-artwork"].front_shiny',
+      label: "Vista frontal de arte oficial (brillante)",
+    },
+    {
+      key: "other.dream_world.front_default",
+      label: "Vista frontal de Mundo de los Sueños (predeterminado)",
+    },
+  ];
+
+  return (
+    <div>
+      {spriteImages.map((sprite, index) => {
+        const spritePath = sprite.key.split(".");
+        let spriteValue = selectedpokemon?.sprites;
+        spritePath.forEach((path) => {
+          spriteValue = spriteValue?.[path];
+        });
+
+        return (
+          <Box
+            key={index}
+            width={"100%"}
+            display={"flex"}
+            justifyContent={"center"}
+          >
+            {spriteValue && (
+              <figure
+                key={sprite.key}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  width: "100%",
+                }}
+              >
+                <img
+                  src={spriteValue}
+                  width={"200px"}
+                  height={"200px"}
+                  alt={sprite.label}
+                />
+                <figcaption style={{ width: "200px", textAlign: "center" }}>
+                  {sprite.label}
+                </figcaption>
+              </figure>
+            )}
+          </Box>
+        );
+      })}
+    </div>
+  );
+};

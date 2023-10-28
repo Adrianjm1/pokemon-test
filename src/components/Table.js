@@ -21,6 +21,11 @@ import Switch from "@mui/material/Switch";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
+import useStore from "../store/zustandStore";
+import { Button, Dialog, Stack } from "@mui/material";
+import { TextfieldSearch } from "./TextfieldSearch";
+import { useState } from "react";
+import CustomizedDialogs from "./Dialog";
 
 function createData(name, calories, fat, carbs, protein) {
   return {
@@ -232,11 +237,7 @@ const EnhancedTableToolbar = (props) => {
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
+        <TextfieldSearch />
       )}
     </Toolbar>
   );
@@ -249,13 +250,17 @@ EnhancedTableToolbar.propTypes = {
 export default function EnhancedTable(props) {
   const { rowsProp, handleEditButton } = props;
   const [rows, setRows] = React.useState(rowsProp || defaultRows);
+  const [open, setOpen] = useState(false);
+  const [pokeName, setPokeName] = useState("");
+
+  const { search } = useStore();
+
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
@@ -271,14 +276,14 @@ export default function EnhancedTable(props) {
     setSelected([]);
   };
 
-  React.useEffect(() => {}, [JSON.stringify(rowsProp)]);
+  // React.useEffect(() => {}, [JSON.stringify(rowsProp)]);
 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
-
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, name);
+      setOpen(true);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -289,7 +294,7 @@ export default function EnhancedTable(props) {
         selected.slice(selectedIndex + 1)
       );
     }
-
+    setPokeName(name);
     setSelected(newSelected);
   };
 
@@ -307,13 +312,15 @@ export default function EnhancedTable(props) {
   };
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
-
+  const filteredRows = rows.filter((row) =>
+    row.name.toLowerCase().includes(search.toLowerCase())
+  );
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "100%", height: "100vh" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer>
@@ -333,12 +340,12 @@ export default function EnhancedTable(props) {
             <TableBody>
               {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                  rows.slice().sort(getComparator(order, orderBy)) */}
-              {stableSort(rows, getComparator(order, orderBy))
+              {stableSort(filteredRows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.name);
                   const labelId = `enhanced-table-checkbox-${index}`;
-
+                  console.log(row.teammates);
                   return (
                     <TableRow
                       hover
@@ -353,23 +360,37 @@ export default function EnhancedTable(props) {
                     >
                       <TableCell padding="checkbox">
                         <Checkbox color="primary" checked={isItemSelected} />
-                        <TableCell padding="checkbox">
-                          <button onClick={handleEditButton(row)}>Edit</button>
-                        </TableCell>
+                        <button onClick={handleEditButton(row)}>Edit</button>
                       </TableCell>
-
-                      <TableCell
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        padding="none"
-                      >
-                        {row.name}
+                      <TableCell align="right">
+                        <img
+                          src={row.img ? row.img : row.sprites.front_default}
+                          width={"96px"}
+                          height={"96px"}
+                          alt="Pokemon"
+                        />
                       </TableCell>
-                      <TableCell align="right">{row.calories}</TableCell>
-                      <TableCell align="right">{row.fat}</TableCell>
-                      <TableCell align="right">{row.carbs}</TableCell>
-                      <TableCell align="right">{row.protein}</TableCell>
+                      <TableCell align="center">#{row.id}</TableCell>
+                      <TableCell align="right">{row.name}</TableCell>
+                      <TableCell align="right">
+                        <ul>
+                          {row?.types.map((type, index) => (
+                            <li key={index}> {type.type.name} </li>
+                          ))}{" "}
+                        </ul>
+                      </TableCell>
+                      <TableCell align="right">
+                        <ul>
+                          {row.teammates &&
+                            row.teammates.map((teammates) => (
+                              <li>{teammates} </li>
+                            ))}{" "}
+                        </ul>
+                      </TableCell>
+                      {/* Convert DM and HG in cm and kg */}
+                      <TableCell align="right">{row.height * 10} cm</TableCell>
+                      <TableCell align="right">{row.weight / 10} kg</TableCell>
+                      <TableCell align="right">{row.description} </TableCell>
                     </TableRow>
                   );
                 })}
@@ -399,6 +420,7 @@ export default function EnhancedTable(props) {
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
       />
+      <CustomizedDialogs open={open} setOpen={setOpen} name={pokeName} />
     </Box>
   );
 }

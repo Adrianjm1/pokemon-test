@@ -1,11 +1,16 @@
 import React from "react";
 import EnhancedTable from "../components/Table";
 import { useNavigate } from "react-router-dom";
+import { Box, Stack } from "@mui/material";
+import { Loader } from "../components/Loader/Loader";
+
+import { axiosGet } from "../axios/axios";
+import { useEffect } from "react";
+import useStore from "../store/zustandStore";
 
 export default function Home(props) {
-  const { tableRows } = props;
-
   const navigate = useNavigate();
+  const { pokemonData } = useStore();
 
   const handleEditButton = (row) => (e) => {
     e.stopPropagation();
@@ -25,13 +30,15 @@ export default function Home(props) {
 
   return (
     <div>
-      {tableRows.length > 0 ? (
+      {pokemonData.length > 0 ? (
         <EnhancedTable
-          rowsProp={tableRows}
+          rowsProp={pokemonData}
           handleEditButton={handleEditButton}
         />
       ) : (
-        "Loading..."
+        <Box>
+          <Loader />
+        </Box>
       )}
     </div>
   );

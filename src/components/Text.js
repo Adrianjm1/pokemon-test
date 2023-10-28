@@ -2,7 +2,11 @@ import React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 
-export default function Text() {
+export default function Text({ label, defaultValue, setInfo, info, name }) {
+  const handleChange = (e) => {
+    setInfo({ ...info, [e.target.name]: e.target.value });
+  };
+
   return (
     <Box
       component="form"
@@ -14,14 +18,16 @@ export default function Text() {
     >
       <div>
         <TextField
+          name={name}
           // error
           // id="standard-error-helper-text"
-          label="Error"
-          defaultValue="Hello World"
-          helperText="Incorrect entry."
-          variant="standard"
-          // rows={5}
-          // multiline={true}
+          onChange={handleChange}
+          label={label}
+          defaultValue={defaultValue}
+          // helperText="Incorrect entry."
+          variant={label === "Descripcion" ? "outlined" : "standard"}
+          multiline={label === "Descripcion" ? true : false}
+          rows={5}
         />
       </div>
     </Box>
